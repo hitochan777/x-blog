@@ -5,7 +5,7 @@ export const getBlogLink = (slug: string) => {
   return `/blog/${slug}`
 }
 
-export const getDateStr = date => {
+export const getDateStr = (date) => {
   return new Date(date).toLocaleString('en-US', {
     month: 'long',
     day: '2-digit',
@@ -13,7 +13,7 @@ export const getDateStr = date => {
   })
 }
 
-export async function getBlogPosts({preview}) {
+export async function getBlogPosts({ preview }) {
   const postsTable = await getBlogIndex(preview)
 
   const authorsToGet: Set<string> = new Set()
@@ -34,11 +34,11 @@ export async function getBlogPosts({preview}) {
 
   const { users } = await getNotionUsers([...authorsToGet])
 
-  return posts.map(post => ({
+  return posts.map((post) => ({
     ...post,
     Authors: post.Authors.map((id) => users[id].full_name),
     blogLink: getBlogLink(post.Slug),
-    dateStr: getDateStr(post.Date)
+    dateStr: getDateStr(post.Date),
   }))
 }
 
@@ -46,7 +46,7 @@ export const postIsPublished = (post: any) => {
   return post.Published === 'Yes'
 }
 
-export const normalizeSlug = slug => {
+export const normalizeSlug = (slug) => {
   if (typeof slug !== 'string') return slug
 
   let startingSlash = slug.startsWith('/')

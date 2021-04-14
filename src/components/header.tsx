@@ -16,10 +16,7 @@ const Header = ({ titlePre = '' }) => {
     <header className={styles.header}>
       <Head>
         <title>{titlePre ? `${titlePre} |` : ''} hitochan777</title>
-        <meta
-          name="description"
-          content="hitochan777's website"
-        />
+        <meta name="description" content="hitochan777's website" />
       </Head>
       <ul>
         {navItems.map(({ label, page, link }) => (

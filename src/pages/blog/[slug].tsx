@@ -70,10 +70,10 @@ export async function getStaticProps({ params: { slug }, preview }) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getBlogPosts({preview: false})
+  const posts = await getBlogPosts({ preview: false })
   return {
-    paths: posts.map(post => post.blogLink),
-    fallback: true
+    paths: posts.map((post) => post.blogLink),
+    fallback: true,
   }
 }
 
@@ -148,9 +148,7 @@ const RenderPost = ({ post, redirect, preview }) => {
       )}
       <div className={blogStyles.post}>
         <h1>{post.Page || ''}</h1>
-        {post.dateStr && (
-          <div className="posted">{post.dateStr}</div>
-        )}
+        {post.dateStr && <div className="posted">{post.dateStr}</div>}
 
         <hr />
 
