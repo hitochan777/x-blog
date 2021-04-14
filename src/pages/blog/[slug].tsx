@@ -70,10 +70,10 @@ export async function getStaticProps({ params: { slug }, preview }) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getBlogPosts({preview: false}) 
+  const posts = await getBlogPosts({preview: false})
   return {
     paths: posts.map(post => post.blogLink),
-    fallback: false
+    fallback: true
   }
 }
 
