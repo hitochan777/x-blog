@@ -51,13 +51,6 @@ const Index = ({ posts = [], preview }) => {
                 </span>
               </h3>
               {post.dateStr && <div className="posted">{post.dateStr}</div>}
-              <p>
-                {(!post.preview || post.preview.length === 0) &&
-                  'No preview available'}
-                {(post.preview || []).map((block, idx) =>
-                  textBlock(block, true, `${post.Slug}${idx}`)
-                )}
-              </p>
             </div>
           )
         })}
