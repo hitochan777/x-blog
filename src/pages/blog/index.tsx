@@ -5,7 +5,6 @@ import blogStyles from '../../styles/blog.module.css'
 import sharedStyles from '../../styles/shared.module.css'
 
 import { getBlogPosts } from '../../lib/blog-helpers'
-import { textBlock } from '../../lib/notion/renderers'
 
 export async function getStaticProps({ preview }) {
 	const posts = await getBlogPosts({ preview })
@@ -14,7 +13,7 @@ export async function getStaticProps({ preview }) {
 			preview: preview || false,
 			posts,
 		},
-		// revalidate: 10,
+		revalidate: 60,
 	}
 }
 
