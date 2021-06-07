@@ -6,9 +6,11 @@ import Footer from '../components/footer'
 export default function MyApp({ Component, pageProps }) {
   return (
     <>
-      <DefaultSeo />
-      <Component {...pageProps} />
-      <Footer />
+      <div style={{display: "flex", flexDirection: "column", minHeight: "100vh", justifyContent: "space-between", }}>
+        <DefaultSeo />
+        <Component {...pageProps} />
+        <Footer />
+      </div>
     </>
   )
 }
