@@ -184,6 +184,14 @@ pre.dark[class*='language-'] {
 
 .myname {
   text-align: center;
+  margin: 0;
+  font-size: 5rem;
+}
+
+@media (max-width: 600px) {
+  .myname {
+    font-size: 3rem;
+  }
 }
 
 .links {
