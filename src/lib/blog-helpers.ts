@@ -31,6 +31,7 @@ export async function getBlogPosts({ preview }) {
       return post
     })
     .filter(Boolean)
+    .sort((a, b) => b.Date - a.Date)
 
   const { users } = await getNotionUsers([...authorsToGet])
 
