@@ -124,7 +124,7 @@
 }
 
 .post {
-  max-width: min(100%, calc(600px + 10%)); 
+  max-width: min(100%, calc(600px + 10%));
   margin: 0 auto;
   padding: 5%;
 }

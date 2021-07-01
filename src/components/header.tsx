@@ -17,7 +17,10 @@ const Header = ({ titlePre = '' }) => {
       <Head>
         <title>{titlePre ? `${titlePre} |` : ''} hitochan777</title>
         <meta name="description" content="hitochan777's website" />
-        <meta name="google-site-verification" content="PRfrFELJZN8wnHVlWLo8WtGQs6iLOUfuxrg9Vq7VyX8" />
+        <meta
+          name="google-site-verification"
+          content="PRfrFELJZN8wnHVlWLo8WtGQs6iLOUfuxrg9Vq7VyX8"
+        />
       </Head>
       <ul>
         {navItems.map(({ label, page, link }) => (
