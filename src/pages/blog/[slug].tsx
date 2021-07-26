@@ -57,7 +57,7 @@ export async function getStaticProps({ params: { slug }, preview }) {
   }
 
   const { users } = await getNotionUsers(post.Authors || [])
-  post.Authors = Object.keys(users).map((id) => users[id].full_name)
+  post.Authors = Object.keys(users).map(id => users[id].full_name)
   post.dateStr = getDateStr(post.Date)
 
   return {
@@ -72,8 +72,8 @@ export async function getStaticProps({ params: { slug }, preview }) {
 export async function getStaticPaths() {
   const posts = await getBlogPosts({ preview: false })
   return {
-    paths: posts.map((post) => post.blogLink),
-    fallback: false,
+    paths: posts.map(post => post.blogLink),
+    fallback: 'blocking',
   }
 }
 
@@ -184,10 +184,10 @@ const RenderPost = ({ post, redirect, preview }) => {
               React.createElement(
                 listTagName,
                 { key: listLastId! },
-                Object.keys(listMap).map((itemId) => {
+                Object.keys(listMap).map(itemId => {
                   if (listMap[itemId].isNested) return null
 
-                  const createEl = (item) =>
+                  const createEl = item =>
                     React.createElement(
                       components.li || 'ul',
                       { key: item.key },
@@ -196,7 +196,7 @@ const RenderPost = ({ post, redirect, preview }) => {
                         ? React.createElement(
                             components.ul || 'ul',
                             { key: item + 'sub-list' },
-                            item.nested.map((nestedId) =>
+                            item.nested.map(nestedId =>
                               createEl(listMap[nestedId])
                             )
                           )
