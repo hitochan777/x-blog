@@ -12,16 +12,15 @@ import React, { CSSProperties, useEffect } from 'react'
 import getBlogIndex from '../../lib/notion/getBlogIndex'
 import getNotionUsers from '../../lib/notion/getNotionUsers'
 import { getBlogPosts, getDateStr } from '../../lib/blog-helpers'
+import NotionClientWrapper from '../../lib/notion'
 
 // Get the data for each blog post
-export async function getStaticProps({ params: { slug }, preview }) {
-  // load the postsTable so that we can get the page's ID
-  const postsTable = await getBlogIndex()
-  const post = postsTable[slug]
+export async function getStaticProps({ params: { slug } }) {
+  const notion = new NotionClientWrapper(process.env.NOTION_DATABASE_ID)
+  const postsTable = await notion.getSlugToPageInfoTable()
+  const postInfo = postsTable.get(slug)
 
-  // if we can't find the post or if it is unpublished and
-  // viewed without preview mode then we just redirect to /blog
-  if (!post || (post.Published !== 'Yes' && !preview)) {
+  if (!postInfo || !postInfo.published) {
     console.log(`Failed to find post for slug: ${slug}`)
     return {
       props: {
@@ -31,48 +30,21 @@ export async function getStaticProps({ params: { slug }, preview }) {
       revalidate: 60,
     }
   }
-  const postData = await getPageData(post.id)
-  post.content = postData.blocks
-
-  for (let i = 0; i < postData.blocks.length; i++) {
-    const { value } = postData.blocks[i]
-    const { type, properties } = value
-    if (type == 'tweet') {
-      const src = properties.source[0][0]
-      // parse id from https://twitter.com/_ijjk/status/TWEET_ID format
-      const tweetId = src.split('/')[5].split('?')[0]
-      if (!tweetId) continue
-
-      try {
-        const res = await fetch(
-          `https://api.twitter.com/1/statuses/oembed.json?id=${tweetId}`
-        )
-        const json = await res.json()
-        properties.html = json.html.split('<script')[0]
-        post.hasTweet = true
-      } catch (_) {
-        console.log(`Failed to get tweet embed for ${src}`)
-      }
-    }
-  }
-
-  const { users } = await getNotionUsers(post.Authors || [])
-  post.Authors = Object.keys(users).map(id => users[id].full_name)
-  post.dateStr = getDateStr(post.Date)
+  const post = await notion.getBlogPost(postInfo.id)
 
   return {
     props: {
       post,
-      preview: preview || false,
     },
     revalidate: 60,
   }
 }
 
 export async function getStaticPaths() {
-  const posts = await getBlogPosts({ preview: false })
+  const notion = new NotionClientWrapper(process.env.NOTION_DATABASE_ID)
+  const posts = await notion.getBlogPosts()
   return {
-    paths: posts.map(post => post.blogLink),
+    paths: posts.map((post) => `/blog/${post.slug}`),
     fallback: 'blocking',
   }
 }
@@ -93,21 +65,6 @@ const RenderPost = ({ post, redirect, preview }) => {
     }
   } = {}
 
-  useEffect(() => {
-    const twitterSrc = 'https://platform.twitter.com/widgets.js'
-    // make sure to initialize any new widgets loading on
-    // client navigation
-    if (post && post.hasTweet) {
-      if ((window as any)?.twttr?.widgets) {
-        ;(window as any).twttr.widgets.load()
-      } else if (!document.querySelector(`script[src="${twitterSrc}"]`)) {
-        const script = document.createElement('script')
-        script.async = true
-        script.src = twitterSrc
-        document.querySelector('body').appendChild(script)
-      }
-    }
-  }, [])
   useEffect(() => {
     if (redirect && !post) {
       router.replace(redirect)
@@ -135,28 +92,17 @@ const RenderPost = ({ post, redirect, preview }) => {
   return (
     <>
       <Header titlePre={post.Page} />
-      {preview && (
-        <div className={blogStyles.previewAlertContainer}>
-          <div className={blogStyles.previewAlert}>
-            <b>Note:</b>
-            {` `}Viewing in preview mode{' '}
-            <Link href={`/api/clear-preview?slug=${post.Slug}`}>
-              <button className={blogStyles.escapePreview}>Exit Preview</button>
-            </Link>
-          </div>
-        </div>
-      )}
       <div className={blogStyles.post}>
-        <h1>{post.Page || ''}</h1>
-        {post.dateStr && <div className="posted">{post.dateStr}</div>}
+        <h1>{post.title || ''}</h1>
+        {post.updatedAt && <div className="posted">{post.updatedAt}</div>}
 
         <hr />
 
-        {(!post.content || post.content.length === 0) && (
+        {(!post.blocks || post.blocks.length === 0) && (
           <p>This post has no content</p>
         )}
 
-        {(post.content || []).map((block, blockIdx) => {
+        {(post.blocks || []).map((block, blockIdx) => {
           const { value } = block
           const { type, properties, id, parent_id } = value
           const isLast = blockIdx === post.content.length - 1
@@ -184,10 +130,10 @@ const RenderPost = ({ post, redirect, preview }) => {
               React.createElement(
                 listTagName,
                 { key: listLastId! },
-                Object.keys(listMap).map(itemId => {
+                Object.keys(listMap).map((itemId) => {
                   if (listMap[itemId].isNested) return null
 
-                  const createEl = item =>
+                  const createEl = (item) =>
                     React.createElement(
                       components.li || 'ul',
                       { key: item.key },
@@ -196,7 +142,7 @@ const RenderPost = ({ post, redirect, preview }) => {
                         ? React.createElement(
                             components.ul || 'ul',
                             { key: item + 'sub-list' },
-                            item.nested.map(nestedId =>
+                            item.nested.map((nestedId) =>
                               createEl(listMap[nestedId])
                             )
                           )
